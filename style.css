@@ -100,6 +100,17 @@ input[prop=height] { width:70%; }
   margin-top:-6px;
 }
 
+.btndown {
+  background:#555;
+}
+
+.mqtthost {
+  float:right;
+  margin-top:-6px;
+  width:50%;
+}
+
+
 .hide {
   display:none;
 }

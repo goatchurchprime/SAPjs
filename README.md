@@ -28,7 +28,20 @@ The OpenEnergyMonitor server is only used to initially load the tool.
     cd SAPjs
     git clone https://github.com/TrystanLea/openBEM
     
- 3\. Thats it, open in browser via e.g: http://localhost/SAPjs
+ 3\. Thats it, open in browser via e.g: http://localhost/SAPjs 
+
+ 4\. You can also run a local server to http://localhost:9000 using the python command:
+
+    python -m http.server 9000
+
+### MQTT interface
+
+It is possible to enable values to be poked in externally via MQTT through the given 
+host, port and topic.  Click the MQTT button down and try out the direct commands:
+
+> mosquitto_pub -h mosquitto.doesliverpool.xyz -t "sapjs/vr1/json" -m '{"id":"D2", "lib":"Stone wall", "l":10, "h":120 }'
+> mosquitto_pub -h mosquitto.doesliverpool.xyz -t "sapjs/vr1/json" -m '{"clear":"elements"}'
+
 
 ### Background
 
