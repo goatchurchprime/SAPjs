@@ -38,15 +38,55 @@ function onMQTTConnectionLost(responseObject) {
 function onMQTTMessageArrived(message) {
 	console.log("onMessageArrived:"+message.payloadString);
 	var msg = JSON.parse(message.payloadString); 
+
+	if (msg["source"] == "tunnelvr") {
+		rmsg = { }
+		rmsg["l"] = msg["width"]; 
+		rmsg["h"] = msg["area"]/msg["width"];
+		rmsg["id"] = msg["name"]; 
+		if (msg["xcflatshellmaterial"] == "intwall") {
+			rmsg["lib"] = "Party wall"; 
+		} else if (msg["xcflatshellmaterial"] == "extwall") {
+			rmsg["lib"] = "Stone wall"; 
+		} else if (msg["xcflatshellmaterial"] == "window") {
+			rmsg["lib"] = "Double Glazing"; 
+		} else {
+			rmsg["lib"] = "*remove*"; 
+		}
+		
+		if (msg["orientationvec"]) {
+			var heading = 180+180/Math.PI*Math.atan2(msg["orientationvec"][0], msg["orientationvec"][2]); 
+			console.log("heading ", heading); 
+			if (Math.abs(heading - 180) < 22.5) {
+				rmsg["orientation"] = 4 // (S)
+			} else if (Math.abs(heading - 180) < 67.5) {
+				rmsg["orientation"] = 3 // (SE/SW)
+			} else if (Math.abs(heading - 180) < 112.5) {
+				rmsg["orientation"] = 2 // (E/W)
+			} else if (Math.abs(heading - 180) < 157.5) { 
+				rmsg["orientation"] = 1 // (NE/NW)
+			} else {
+				rmsg["orientation"] = 0 // (N)
+			}
+		}
+		
+		msg = rmsg; 
+	}
+	
 	if (msg["clear"]) {
 		if (msg["clear"] == "elements")
 			app.data.fabric.elements.splice(0); 
 		app.update(); 
-	} else if (msg["id"]) {
+	} else if (msg["id"] && msg["lib"]) {
 		var ifound = 0; 
 		while ((ifound < app.data.fabric.elements.length) && (app.data.fabric.elements[ifound]["id"] != msg["id"]))
 			ifound += 1; 
-		app.data.fabric.elements[ifound] = msg; 
+		if (msg["lib"] != "*remove*") {
+			app.data.fabric.elements[ifound] = msg; 
+		} else if (ifound < app.data.fabric.elements.length) {
+			app.data.fabric.elements.splice(ifound, 1); 
+		}
+		
 		app.update(); 
 	}
 }
@@ -69,6 +109,8 @@ $(document).ready(function() {
 				dclient.disconnect(); 
 		}
 	}); 
+	
+	window.setTimeout(function() { $(".mqttbutton").click(); }, 1000); 
 }); 
 </script>
 
